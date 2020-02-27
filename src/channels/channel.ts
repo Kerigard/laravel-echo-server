@@ -237,18 +237,18 @@ export class Channel {
         this.request.post(options, (error, response, body, next) => {
             if (error) {
                 if (this.options.devMode) {
-                    Log.error(`[${new Date().toLocaleTimeString()}] - Error call ${event} hook ${socket.id} for ${options.form.channel_name}`);
+                    Log.error(`[${new Date().toLocaleTimeString()}] - Error call ${event} hook ${socket.id} for ${options.form.channel}`);
                 }
 
                 Log.error(error);
             } else if (response.statusCode !== 200) {
                 if (this.options.devMode) {
-                    Log.warning(`[${new Date().toLocaleTimeString()}] - Error call ${event} hook ${socket.id} for ${options.form.channel_name}`);
+                    Log.warning(`[${new Date().toLocaleTimeString()}] - Error call ${event} hook ${socket.id} for ${options.form.channel}`);
                     Log.error(response.body);
                 }
             } else {
                 if (this.options.devMode) {
-                    Log.info(`[${new Date().toLocaleTimeString()}] - Call ${event} hook for ${socket.id} for ${options.form.channel_name}: ${response.body}`);
+                    Log.info(`[${new Date().toLocaleTimeString()}] - Call ${event} hook for ${socket.id} for ${options.form.channel}: ${response.body}`);
                 }
             }
         });
