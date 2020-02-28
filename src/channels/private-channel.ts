@@ -68,7 +68,7 @@ export class PrivateChannel {
                     authHostSelected = `${referer.protocol}//${referer.host}`;
                     break;
                 }
-            };
+            }
         }
 
         return authHostSelected;

@@ -2,6 +2,7 @@ let request = require('request');
 import { PresenceChannel } from './presence-channel';
 import { PrivateChannel } from './private-channel';
 import { Log } from './../log';
+var fs = require('fs');
 
 export class Channel {
     /**
@@ -46,6 +47,7 @@ export class Channel {
         this.private = new PrivateChannel(options);
         this.presence = new PresenceChannel(io, options);
         this.request = request;
+        this.options = options;
 
         if (this.options.devMode) {
             Log.success('Channels are ready.');
@@ -217,11 +219,11 @@ export class Channel {
     }
 
     /**
-     * 
-     * @param {any} socket 
+     *
+     * @param {any} socket
      * @param {string} channel
-     * @param {object} auth 
-     * @param {string} event 
+     * @param {object} auth
+     * @param {string} event
      * @param {object} payload
      */
     hook(socket:any, channel: any, auth: any, event: string, payload: object) {
@@ -232,14 +234,13 @@ export class Channel {
 
         let hookEndpoint = this.options.hookEndpoint;
 
-        let options = this.prepareHookHeaders(socket, auth, channel, hookEndpoint, event, payload)
+        let options = this.prepareHookHeaders(socket, auth, channel, hookEndpoint, event, payload);
 
         this.request.post(options, (error, response, body, next) => {
             if (error) {
                 if (this.options.devMode) {
                     Log.error(`[${new Date().toLocaleTimeString()}] - Error call ${event} hook ${socket.id} for ${options.form.channel}`);
                 }
-
                 Log.error(error);
             } else if (response.statusCode !== 200) {
                 if (this.options.devMode) {
@@ -256,7 +257,7 @@ export class Channel {
 
     /**
      * Prepare headers for request to app server.
-     * 
+     *
      * @param {any} socket
      * @param {any} auth
      * @param {string} channel
@@ -266,17 +267,27 @@ export class Channel {
      * @returns {any}
      */
     prepareHookHeaders(socket: any, auth: any, channel: string, hookEndpoint: string, event: string, payload: any): any {
-        let hookHost = this.options.hookHost ? this.options.hookHost : this.options.authHost
+        let hookHost = this.options.hookHost ? this.options.hookHost : this.options.authHost;
         let options = {
             url: hookHost + hookEndpoint,
-            form: { 
+            form: {
                 event: event,
-                channel: channel, 
-                payload: payload 
+                channel: channel,
+                payload: payload
             },
             headers: (auth && auth.headers) ? auth.headers : {}
         };
-        
+
+        if (hookHost.indexOf('https')>-1 && this.options.sslCertPath && this.options.sslKeyPath) {
+            options['agentOptions']= {
+                cert: fs.readFileSync(this.options.sslCertPath),
+                key: fs.readFileSync(this.options.sslKeyPath),
+                passphrase: this.options.sslPassphrase,
+                //securityOptions: 'SSL_OP_NO_SSLv3'
+            };
+            options['strictSSL']=false;
+        }
+
         options.headers['Cookie'] = socket.request.headers.cookie;
         options.headers['X-Requested-With'] = 'XMLHttpRequest';
         return options;
