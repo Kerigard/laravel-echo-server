@@ -23,8 +23,7 @@ $   npm install -g laravel-echo-server
 
 ```
 
-The above don't working
-You need to move into global NPM modules directory and do the following because package is not in NPM and do not compile when npm install from GIT
+The above don't working. You need to move into global NPM modules directory and do the following because package is not in NPM and do not compile when you `npm install` it from GIT
 
 ```
 
