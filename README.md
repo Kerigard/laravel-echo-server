@@ -23,6 +23,17 @@ $   npm install -g laravel-echo-server
 
 ```
 
+The above don't working
+You need to move into global NPM modules directory and do the following because package is not in NPM and do not compile when npm install from GIT
+
+```
+
+git clone https://github.com/New-technologies-LP/laravel-echo-server
+cd laravel-echo-server
+npm install
+
+```
+
 ### Initialize with CLI Tool
 
 Run the init command in your project directory:
