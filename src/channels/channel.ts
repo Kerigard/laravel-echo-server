@@ -87,7 +87,10 @@ export class Channel {
                 this.io.sockets.connected[socket.id]
                     .broadcast.to(data.channel)
                     .emit(data.event, data.channel, data.data);
-                this.hook(socket, data.channel, data.auth, "client_event", data.data);
+
+                if (data.event!='client-typing') { // block hooks from firing on client typing
+                    this.hook(socket, data.channel, data.auth, "client_event", data.data);
+                }
             }
         }
     }
@@ -113,7 +116,26 @@ export class Channel {
                 Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} left channel: ${channel} (${reason})`);
             }
 
-            this.hook(socket, channel, auth, "leave", null);
+            // fix leave hook to set it up only if user is offline from channel
+            let rooms = this.io.sockets.adapter.rooms;
+            let channels = {};
+
+            Object.keys(rooms).forEach(function(channelName) {
+                if (rooms[channelName].sockets[channelName]) {
+                    return;
+                }
+                channels[channelName] = {
+                    subscription_count: rooms[channelName].length,
+                    occupied: true
+                };
+            });
+
+            if (typeof channels[channel]!='undefined' && channels[channel].subscription_count>0) {
+                Log.info(`[${new Date().toLocaleTimeString()}] - Channel "${channel}" is not empty, leave hook is not need!`);
+            } else {
+                this.hook(socket, channel, auth, "leave", null);
+            }
+
         }
     }
 

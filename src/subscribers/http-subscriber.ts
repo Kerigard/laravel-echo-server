@@ -63,8 +63,9 @@ export class HttpSubscriber implements Subscriber {
             var channels = body.channels || [body.channel];
 
             if (this.options.devMode) {
-                Log.info("Channel: " + channels.join(', '));
+                Log.info("Channel (http): " + channels.join(', '));
                 Log.info("Event: " + message.event);
+                Log.info("Data: " + JSON.stringify(message.data));
             }
 
             channels.forEach(channel => broadcast(channel, message));

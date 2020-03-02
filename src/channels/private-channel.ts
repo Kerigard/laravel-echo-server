@@ -32,7 +32,7 @@ export class PrivateChannel {
             url: this.authHost(socket) + this.options.authEndpoint,
             form: { channel_name: data.channel },
             headers: (data.auth && data.auth.headers) ? data.auth.headers : {},
-            rejectUnauthorized: false
+            rejectUnauthorized: true
         };
 
         if (this.options.devMode) {
