@@ -2,6 +2,7 @@ let request = require('request');
 let url = require('url');
 import { Channel } from './channel';
 import { Log } from './../log';
+var fs = require('fs');
 
 export class PrivateChannel {
     /**
@@ -49,8 +50,7 @@ export class PrivateChannel {
      * @return {string}
      */
     protected authHost(socket: any): string {
-        let authHosts = (this.options.authHost) ?
-            this.options.authHost : this.options.host;
+        let authHosts = (this.options.authHost) ? this.options.authHost : this.options.host;
 
         if (typeof authHosts === "string") {
             authHosts = [authHosts];
@@ -97,6 +97,19 @@ export class PrivateChannel {
     protected serverRequest(socket: any, options: any): Promise<any> {
         return new Promise<any>((resolve, reject) => {
             options.headers = this.prepareHeaders(socket, options);
+
+            let authHost = this.options.authHost;
+
+            if (authHost.indexOf('https')>-1 && this.options.sslCertPath && this.options.sslKeyPath) {
+                options['agentOptions']= {
+                    cert: fs.readFileSync(this.options.sslCertPath),
+                    key: fs.readFileSync(this.options.sslKeyPath),
+                    passphrase: this.options.sslPassphrase,
+                    //securityOptions: 'SSL_OP_NO_SSLv3'
+                };
+                options['strictSSL']=false;
+            }
+
             let body;
 
             this.request.post(options, (error, response, body, next) => {
@@ -141,7 +154,6 @@ export class PrivateChannel {
     protected prepareHeaders(socket: any, options: any): any {
         options.headers['Cookie'] = options.headers['Cookie'] || socket.request.headers.cookie;
         options.headers['X-Requested-With'] = 'XMLHttpRequest';
-
         return options.headers;
     }
 }

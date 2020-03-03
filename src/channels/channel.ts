@@ -89,6 +89,7 @@ export class Channel {
                     .emit(data.event, data.channel, data.data);
 
                 if (data.event!='client-typing') { // block hooks from firing on client typing
+                    data.data.event=data.event; // added client event name to catch it on server side
                     this.hook(socket, data.channel, data.auth, "client_event", data.data);
                 }
             }
