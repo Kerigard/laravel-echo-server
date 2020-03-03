@@ -27,6 +27,8 @@ The above don't working. You need to move into global NPM modules directory and 
 
 ```
 
+npm install -g typescript
+cd ~/.../node_modules (global node_modules folder)
 git clone https://github.com/New-technologies-LP/laravel-echo-server
 cd laravel-echo-server
 npm install
