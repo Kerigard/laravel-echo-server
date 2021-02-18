@@ -111,12 +111,11 @@ export class Channel {
             if (this.isPresence(channel)) {
                 this.presence.leave(socket, channel)
             }
-
+            console.log(socket, channel, reason, auth)
             socket.leave(channel);
 
             if (this.options.devMode) {
                 Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} left channel: ${channel} (${reason})`);
-                Log.info(auth, socket);
             }
 
             // fix leave hook to set it up only if user is offline from channel
