@@ -81,6 +81,7 @@ export class Channel {
      */
     clientEvent(socket, data): void {
         if (data.event && data.channel) {
+            Log.info(data);
             if (this.isClientEvent(data.event) &&
                 this.isPrivate(data.channel) &&
                 this.isInChannel(socket, data.channel)) {
@@ -115,6 +116,7 @@ export class Channel {
 
             if (this.options.devMode) {
                 Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} left channel: ${channel} (${reason})`);
+                Log.info(auth, socket);
             }
 
             // fix leave hook to set it up only if user is offline from channel
@@ -130,7 +132,7 @@ export class Channel {
                     occupied: true
                 };
             });
-
+            
             if (typeof channels[channel]!='undefined' && channels[channel].subscription_count>0) {
                 Log.info(`[${new Date().toLocaleTimeString()}] - Channel "${channel}" is not empty, leave hook is not need!`);
             } else {
