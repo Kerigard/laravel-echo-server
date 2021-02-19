@@ -124,10 +124,12 @@ export class PresenceChannel {
      * @param  {string} channel
      * @return {void}
      */
-    leave(socket: any, channel: string): void {
-        this.getMembers(channel).then(members => {
+    async leave(socket: any, channel: string): Promise<any> {
+        let memberResult;
+        await this.getMembers(channel).then(members => {
             members = members || [];
             let member = members.find(member => member.socketId == socket.id);
+            memberResult = member;
             members = members.filter(m => m.socketId != member.socketId);
 
             this.db.set(channel + ':members', members);
@@ -139,6 +141,8 @@ export class PresenceChannel {
                 }
             });
         }, error => Log.error(error));
+
+        return memberResult;
     }
 
     /**
@@ -166,6 +170,7 @@ export class PresenceChannel {
      * @return {void}
      */
     onLeave(channel: string, member: any): void {
+        console.log(member)
         this.io
             .to(channel)
             .emit('presence:leaving', channel, member);

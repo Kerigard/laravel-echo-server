@@ -106,10 +106,13 @@ export class Channel {
      * @param  {object} auth
      * @return {void}
      */
-    leave(socket: any, channel: string, reason: string, auth: any): void {
+    async leave(socket: any, channel: string, reason: string, auth: any): Promise<void> {
         if (channel) {
+            let userId = null;
+
             if (this.isPresence(channel)) {
-                this.presence.leave(socket, channel)
+                let member = await this.presence.leave(socket, channel);
+                userId = member.user_id;
             }
             console.log(socket, channel, reason, auth)
             socket.leave(channel);
@@ -131,12 +134,15 @@ export class Channel {
                     occupied: true
                 };
             });
-            
+
             if (typeof channels[channel]!='undefined' && channels[channel].subscription_count>0) {
                 Log.info(`[${new Date().toLocaleTimeString()}] - Channel "${channel}" is not empty, leave hook is not need!`);
+                console.log('NOT SEND HOOK!!!!');
             } else {
-                this.hook(socket, channel, auth, "leave", null);
+                console.log('SEND HOOK!!!!');
             }
+            // this.hook(socket, channel, auth, "leave", userId);
+            this.hook(socket, channel, auth, "leave", {"user":userId});
 
         }
     }
@@ -168,7 +174,6 @@ export class Channel {
     joinPrivate(socket: any, data: any): void {
         this.private.authenticate(socket, data).then(res => {
             socket.join(data.channel);
-
             if (this.isPresence(data.channel)) {
                 var member = res.channel_data;
                 try {
@@ -178,7 +183,7 @@ export class Channel {
                 this.presence.join(socket, data.channel, member);
             }
 
-            this.onJoin(socket, data.channel, data.auth);
+            this.onJoin(socket, data.channel, data.auth, member);
         }, error => {
             if (this.options.devMode) {
                 Log.error(error.reason);
@@ -205,13 +210,14 @@ export class Channel {
      * @param {any} socket
      * @param {string} channel
      * @param {any} auth
+     * @param {any} member
      */
-    onJoin(socket: any, channel: string, auth: any): void {
+    onJoin(socket: any, channel: string, auth: any, member: any = null): void {
         if (this.options.devMode) {
             Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} joined channel: ${channel}`);
         }
 
-        this.hook(socket, channel, auth, "join", null);
+        this.hook(socket, channel, auth, "join", {"user":member.user_id});
     }
 
     /**
