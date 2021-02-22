@@ -45,12 +45,7 @@ export class EchoServer {
             allowMethods: '',
             allowHeaders: ''
         },
-        hookHost: null,
-        hooks: {
-            "onJoinEndpoint": null,
-            "onLeaveEndpoint": null,
-            "onClientEventEndpoint": null
-        }
+        "hookEndpoint": null,
     };
 
     /**

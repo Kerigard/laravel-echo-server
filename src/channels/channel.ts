@@ -114,7 +114,6 @@ export class Channel {
                 let member = await this.presence.leave(socket, channel);
                 userId = member.user_id;
             }
-            console.log(socket, channel, reason, auth)
             socket.leave(channel);
 
             if (this.options.devMode) {
@@ -136,14 +135,21 @@ export class Channel {
             });
 
             if (typeof channels[channel]!='undefined' && channels[channel].subscription_count>0) {
-                Log.info(`[${new Date().toLocaleTimeString()}] - Channel "${channel}" is not empty, leave hook is not need!`);
-                console.log('NOT SEND HOOK!!!!');
-            } else {
-                console.log('SEND HOOK!!!!');
-            }
-            // this.hook(socket, channel, auth, "leave", userId);
-            this.hook(socket, channel, auth, "leave", {"user":userId});
 
+                Log.info(`[${new Date().toLocaleTimeString()}] - Channel "${channel}" is not empty, leave hook is not need!`);
+
+                if (this.isPresence(channel)) {
+                    this.presence.getMembers(channel).then(members => {
+                        let member = members.filter(member => member.user_id === userId);
+
+                        if (member.length === 0) {
+                            this.hook(socket, channel, auth, "leave", userId);
+                        }
+                    });
+                }
+            } else {
+                this.hook(socket, channel, auth, "leave", userId);
+            }
         }
     }
 
@@ -217,6 +223,17 @@ export class Channel {
             Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} joined channel: ${channel}`);
         }
 
+        // if (this.isPresence(channel)) {
+        //     this.presence.getMembers(channel).then(members => {
+        //         console.log(members)
+        //         // let currentMember = members.filter(iterableMember => iterableMember.user_id === member.user_id);
+        //         //
+        //         // console.log('я долбаеб дважды зашел')
+        //         // if (currentMember.length === 0) {
+        //         //     this.hook(socket, channel, auth, "join", {"user":member.user_id});
+        //         // }
+        //     });
+        // }
         this.hook(socket, channel, auth, "join", {"user":member.user_id});
     }
 

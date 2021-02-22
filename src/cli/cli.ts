@@ -62,7 +62,7 @@ export class Cli {
             }
 
             this.saveConfig(options).then(file => {
-                console.log('Configuration file saved. Run ' + colors.magenta.bold('laravel-echo-server start' + (file != 'laravel-echo-server.json' ? ' --config="' + file + '"' : '')) + ' to run server.');
+                console.log('Configuration file saved. Run ' + colors.magenta.bold('laravel-echo-server-with-webhooks start' + (file != 'laravel-echo-server.json' ? ' --config="' + file + '"' : '')) + ' to run server.');
 
                 process.exit();
             }, error => {
