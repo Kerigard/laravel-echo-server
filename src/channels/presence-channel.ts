@@ -132,12 +132,6 @@ export class PresenceChannel {
             memberResult = member;
             members = members.filter(m => m.socketId != member.socketId);
 
-            // let doubleMember = (members.findIndex(iterableMember => iterableMember.user_id === member.user_id) > -1);
-            // if (doubleMember === true) {
-            //     memberResult = false;
-            // }
-            // console.log(memberResult);
-
             this.db.set(channel + ':members', members);
 
             this.isMember(channel, member).then(is_member => {
