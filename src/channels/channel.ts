@@ -128,6 +128,7 @@ export class Channel {
             } else {
                 payload = {};
             }
+
             this.hook(socket, channel, auth, "leave", payload);
 
             // TODO Not needed choice send or not send when exists another online user
@@ -229,7 +230,13 @@ export class Channel {
             Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} joined channel: ${channel}`);
         }
 
-        let payload = {"userId": member.user_id};
+        console.log(member);
+        let payload;
+        if (member !== null) {
+            payload = {"userId": member.user_id};
+        } else {
+            payload = {};
+        }
         this.hook(socket, channel, auth, "join", payload);
     }
 

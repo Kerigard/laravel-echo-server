@@ -1,6 +1,6 @@
 {
   "name": "laravel-echo-server-with-webhooks",
-  "version": "1.6.2",
+  "version": "2.0.0",
   "description": "Laravel Echo Node JS Server for Socket.io with webhooks client-events",
   "repository": {
     "type": "git",
