@@ -230,7 +230,6 @@ export class Channel {
             Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} joined channel: ${channel}`);
         }
 
-        console.log(member);
         let payload;
         if (member !== null) {
             payload = {"userId": member.user_id};

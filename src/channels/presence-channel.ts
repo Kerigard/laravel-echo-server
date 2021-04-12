@@ -82,7 +82,7 @@ export class PresenceChannel {
      * Join a presence channel and emit that they have joined only if it is the
      * first instance of their presence.
      *
-     * @param  {any} socket
+     * @param  {object} socket
      * @param  {string} channel
      * @param  {object}  member
      */
@@ -120,27 +120,42 @@ export class PresenceChannel {
      * Remove a member from a presenece channel and broadcast they have left
      * only if not other presence channel instances exist.
      *
-     * @param  {any} socket
+     * @param  {object} socket
      * @param  {string} channel
      * @return {void}
      */
     async leave(socket: any, channel: string): Promise<any> {
         let memberResult;
-        await this.getMembers(channel).then(members => {
-            members = members || [];
-            let member = members.find(member => member.socketId == socket.id);
-            memberResult = member;
-            members = members.filter(m => m.socketId != member.socketId);
+        await this.getMembers(channel).then(
+            (members) => {
+                members = members || [];
+                let member
 
-            this.db.set(channel + ':members', members);
+                members = members.filter((m) => {
+                    if(m.socketId == socket.id) {
+                        member = m;
+                        return false;
+                    }
 
-            this.isMember(channel, member).then(is_member => {
-                if (!is_member) {
-                    delete member.socketId;
-                    this.onLeave(channel, member);
+                    return true;
+                });
+
+                this.db.set(channel + ':members', members);
+
+                if (member) {
+                    memberResult = member;
+                    this.isMember(channel, member).then(is_member => {
+                        if (!is_member) {
+                            if (member !== undefined && member !== null) {
+                                delete member.socketId;
+                            }
+                            this.onLeave(channel, member);
+                        }
+                    });
                 }
-            });
-        }, error => Log.error(error));
+            },
+            error => Log.error(error)
+        );
 
         return memberResult;
     }
