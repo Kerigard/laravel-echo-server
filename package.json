@@ -1,10 +1,10 @@
 {
-  "name": "laravel-echo-server-with-webhooks",
+  "name": "@kerigard/laravel-echo-server",
   "version": "2.0.4",
   "description": "Laravel Echo Node JS Server for Socket.io with webhooks client-events",
   "repository": {
     "type": "git",
-    "url": "https://github.com/DjPlus/laravel-echo-server"
+    "url": "https://github.com/Kerigard/laravel-echo-server"
   },
   "main": "dist/index.js",
   "keywords": [
@@ -41,6 +41,6 @@
     "sqlite3": "^3.1.13"
   },
   "bin": {
-    "laravel-echo-server-with-webhooks": "bin/server.js"
+    "@kerigard/laravel-echo-server": "bin/server.js"
   }
 }

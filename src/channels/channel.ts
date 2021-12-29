@@ -129,34 +129,17 @@ export class Channel {
                 payload = {};
             }
 
-            this.hook(socket, channel, auth, "leave", payload);
+            if (this.isPresence(channel) && user !== null) {
+                this.presence.getMembers(channel).then(members => {
+                    let member = members.find(member => member.user_id === user.user_id);
 
-            // TODO Not needed choice send or not send when exists another online user
-            // fix leave hook to set it up only if user is offline from channel
-            // let rooms = this.io.sockets.adapter.rooms;
-            // let channels = {};
-            //
-            // Object.keys(rooms).forEach(function(channelName) {
-            //     if (rooms[channelName].sockets[channelName]) {
-            //         return;
-            //     }
-            //     channels[channelName] = {
-            //         subscription_count: rooms[channelName].length,
-            //         occupied: true
-            //     };
-            // });
-            // if (typeof channels[channel]!='undefined' && channels[channel].subscription_count>0) {
-            //     // Send webhook if
-            //     if (this.isPresence(channel)) {
-            //         this.presence.getMembers(channel).then(members => {
-            //
-            //             let member = members.filter(member => member.user_id === user.user_id);
-            //
-            //             if (member.length === 0 && user.user_id !== null) {
-            //                 this.hook(socket, channel, auth, "leave", payload);
-            //             }
-            //         });
-            //     }
+                    if (!member) {
+                        this.hook(socket, channel, auth, "leave", payload);
+                    }
+                });
+            } else {
+                this.hook(socket, channel, auth, "leave", payload);
+            }
         }
     }
 
@@ -236,7 +219,18 @@ export class Channel {
         } else {
             payload = {};
         }
-        this.hook(socket, channel, auth, "join", payload);
+
+        if (this.isPresence(channel) && member !== null) {
+            this.presence.getMembers(channel).then(members => {
+                let user = members.find(user => user.user_id === member.user_id);
+
+                if (!user) {
+                    this.hook(socket, channel, auth, "join", payload);
+                }
+            });
+        } else {
+            this.hook(socket, channel, auth, "join", payload);
+        }
     }
 
     /**

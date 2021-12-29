@@ -19,7 +19,7 @@ Install npm package globally with the following command:
 
 ``` shell
 
-$   npm install -g laravel-echo-server-with-webhooks
+$   npm install -g @kerigard/laravel-echo-server
 
 ```
 
@@ -28,7 +28,7 @@ $   npm install -g laravel-echo-server-with-webhooks
 Run the init command in your project directory:
 
 ``` shell
-$   laravel-echo-server-with-webhooks init
+$   laravel-echo-server init
 ```
 
 The cli tool will help you setup a **laravel-echo-server.json** file in the root directory of your project. This file will be loaded by the server during start up. You may edit this file later on to manage the configuration of your server.
@@ -38,7 +38,7 @@ The cli tool will help you setup a **laravel-echo-server.json** file in the root
 The Laravel Echo Server exposes a light http API to perform broadcasting functionality. For security purposes, access to these endpoints from http referrers must be authenticated with an API id and key. This can be generated using the cli command:
 
 ``` shell
-$ laravel-echo-server-with-webhooks client:add APP_ID
+$ laravel-echo-server client:add APP_ID
 ```
 
 If you run `client:add` without an app id argument, one will be generated for you. After running this command, the client id and key will be displayed and stored in the **laravel-echo-server.json** file.
@@ -55,14 +55,14 @@ or
 http://app.dev:6001/apps/APP_ID/channels?auth_key=skti68i...
 ```
 
-You can remove clients with `laravel-echo-server-with-webhooks client:remove APP_ID`
+You can remove clients with `laravel-echo-server client:remove APP_ID`
 
 #### Run The Server
 
 in your project root directory, run
 
 ``` shell
-$ laravel-echo-server-with-webhooks start
+$ laravel-echo-server start
 ```
 
 #### Stop The Server
@@ -70,7 +70,7 @@ $ laravel-echo-server-with-webhooks start
 in your project root directory, run
 
 ``` shell
-$ laravel-echo-server-with-webhooks stop
+$ laravel-echo-server stop
 ```
 
 ### Configurable Options
@@ -130,7 +130,7 @@ location /socket.io {
 ```
 
 ### Setting the working directory
-The working directory in which `laravel-echo-server` will look for the configuration file `laravel-echo-server.json` can be passed to the `start` command through the `--dir` parameter like so: `laravel-echo-server-with-webhooks start --dir=/var/www/html/example.com/configuration`
+The working directory in which `laravel-echo-server` will look for the configuration file `laravel-echo-server.json` can be passed to the `start` command through the `--dir` parameter like so: `laravel-echo-server start --dir=/var/www/html/example.com/configuration`
 
 ## Subscribers
 The Laravel Echo Server subscribes to incoming events with two methods: Redis & Http.
