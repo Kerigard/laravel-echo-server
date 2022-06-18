@@ -18,9 +18,7 @@ official docs: <https://laravel.com/docs/master/broadcasting>
 Install npm package globally with the following command:
 
 ``` shell
-
 $   npm install -g @kerigard/laravel-echo-server
-
 ```
 
 ### Initialize with CLI Tool
@@ -35,7 +33,7 @@ The cli tool will help you setup a **laravel-echo-server.json** file in the root
 
 #### API Clients
 
-The Laravel Echo Server exposes a light http API to perform broadcasting functionality. For security purposes, access to these endpoints from http referrers must be authenticated with an API id and key. This can be generated using the cli command:
+The Laravel Echo Server exposes a light http API to perform broadcasting functionality. For security purposes, access to these endpoints from http referrers must be authenticated with an APP id and key. This can be generated using the cli command:
 
 ``` shell
 $ laravel-echo-server client:add APP_ID
@@ -106,6 +104,14 @@ file, the following options can be overridden:
 - `host`: `LARAVEL_ECHO_SERVER_HOST`
 - `port`: `LARAVEL_ECHO_SERVER_PORT`
 - `devMode`: `LARAVEL_ECHO_SERVER_DEBUG`
+- `databaseConfig.redis.host`: `LARAVEL_ECHO_SERVER_REDIS_HOST`
+- `databaseConfig.redis.port`: `LARAVEL_ECHO_SERVER_REDIS_PORT`
+- `databaseConfig.redis.password`: `LARAVEL_ECHO_SERVER_REDIS_PASSWORD`
+- `protocol`: `LARAVEL_ECHO_SERVER_PROTO`
+- `sslKeyPath`: `LARAVEL_ECHO_SERVER_SSL_KEY`
+- `sslCertPath`: `LARAVEL_ECHO_SERVER_SSL_CERT`
+- `sslPassphrase`: `LARAVEL_ECHO_SERVER_SSL_PASS`
+- `sslCertChainPath`: `LARAVEL_ECHO_SERVER_SSL_CHAIN`
 
 
 ### Running with SSL
@@ -127,6 +133,17 @@ location /socket.io {
 	    proxy_set_header Upgrade $http_upgrade;
 	    proxy_set_header Connection "Upgrade";
 	}
+```
+
+#### Sample Apache proxy config
+
+```
+RewriteCond %{REQUEST_URI}  ^/socket.io            [NC]
+RewriteCond %{QUERY_STRING} transport=websocket    [NC]
+RewriteRule /(.*)           ws://localhost:6001/$1 [P,L]
+
+ProxyPass        /socket.io http://localhost:6001/socket.io
+ProxyPassReverse /socket.io http://localhost:6001/socket.io
 ```
 
 ### Setting the working directory
@@ -251,7 +268,8 @@ For example, if you wanted to pass a custom configuration to Redis:
   "databaseConfig" : {
     "redis" : {
       "port": "3001",
-      "host": "redis.app.dev"
+      "host": "redis.app.dev",
+      "keyPrefix": "my-redis-prefix"
     }
   }
 }
@@ -261,8 +279,35 @@ For example, if you wanted to pass a custom configuration to Redis:
 
 *A full list of Redis options can be found [here](https://github.com/luin/ioredis/blob/master/API.md#new-redisport-host-options).*
 
+### Redis sentinel
+For example, if you wanted to use redis-sentinel, you need to pass a custom configuration : 
+
+``` json
+ "databaseConfig": {
+     "redis": {
+       "sentinels": [
+         {
+           "host": "redis-sentinel-0",
+           "port": 26379
+         },
+         {
+            "host": "redis-sentinel-1",
+            "port": 26379
+         }
+         {
+           "host": "redis-sentinel-2",
+           "port": 26379
+         }
+       ],
+       "name": "mymaster",
+       "sentinelPassword": "redis-password"
+     },
+   },
+ ``` 
+*For more information about redis sentinel configuration you can check [this](https://github.com/luin/ioredis#sentinel)*
 ### SQLite
-With SQLite you may be interested in changing the path where the database is stored:
+
+With SQLite you may be interested in changing the path where the database is stored.
 
 ``` json
 {
@@ -274,7 +319,9 @@ With SQLite you may be interested in changing the path where the database is sto
 }
 ```
 
-***Note: [node-sqlite3](https://github.com/mapbox/node-sqlite3) is required for this database. Please install before using.***
+***Note 1:*** The path is relative to the root of your application, not your system.
+
+***Note 2:*** [node-sqlite3](https://github.com/mapbox/node-sqlite3) is required for this database. Please install before using.
 
 ```
 npm install sqlite3 -g
@@ -323,16 +370,9 @@ add a script tag to your html like so:
 
 _Note: When using the socket.io client library from your running server, remember to check that the `io` global variable is defined before subscribing to events._
 
-#### Better performance with [µWebSockets](https://github.com/uWebSockets/uWebSockets)
-For extra performance, you can use the faster `uws` engine instead of `ws`, by setting the `wsEngine` option for Socket.IO in `laravel-echo-server.json`:
+#### µWebSockets deprecation
 
-```js
-"socketio": {
-    "wsEngine": "uws"
-}
-```
-
-See <https://github.com/uWebSockets/uWebSockets> for more information.
+µWebSockets has been [officially deprecated](https://www.npmjs.com/package/uws). Currently there is no support for µWebSockets in Socket.IO, but it may have the new [ClusterWS](https://www.npmjs.com/package/@clusterws/cws) support incoming. Meanwhile Laravel Echo Server will use [`ws` engine](https://www.npmjs.com/package/ws) by default until there is another option.
 
 ## Hook client side event
 There are 3 types of client-side event can be listen to. Here is the event names:
@@ -344,7 +384,7 @@ There are 3 types of client-side event can be listen to. Here is the event names
 First, you need to configurate your `hookEndpoint`. Here is an example:
 
 ```ini
-"hookHost": "/api/hook",
+"hookEndpoint": "/api/hook",
 ```
 
 You don't need to configure hook host. hook host value is getting from `authHost`
@@ -364,9 +404,9 @@ There is always an attribute in post form called `channel`. You can get event pa
 | :-------------------| :---------------------- | :-------------------| :---------------------|
 | `event`             | The event name. Options: `join`, `leave`, `client_event`          | `join`              |                       |
 | `channel`           | The channel name        | `meeting`           |                      |
-| `payload`           | Payload of client event. `joinChannel` or `leaveChannel` hook doesn't have payload | `{from: 'Alex', to: 'Bill'}` | `null`       |
+| `payload`           | Payload of event. `userId` is only in the `Presence channel` | `{from: 'Alex', to: 'Bill'}` `{userId: '123'}` | `null`       |
 
-### join channel hook
+### Join channel hook
 When users join in a channel `event` should be `join`.
 
 The request form example:
@@ -382,12 +422,14 @@ Route::post('/hook', function(Request $request) {
     $channel = $request->input('channel');
     $x_csrf_token = $request->header('X-CSRF-TOKEN');
     $cookie = $request->header('Cookie');
-    // ... 
+    $payload = $request->input('payload');
+    $userId = $payload['userId'];
+    // ...
   }
 });
 ```
 
-### leave channel hook
+### Leave channel hook
 When users leave a channel `event` should be `leave`.
 
 > Notes that there is no X-CSRF-TOKEN in header when sending a post request for leave channel event, so you'd better not to use the route in `/routes/web.php`.
@@ -406,12 +448,14 @@ Route::post('/hook', function(Request $request) {
   if ($request->input('event') === 'leave') {
     $channel = $request->input('channel');
     $cookie = $request->header('Cookie');
+    $payload = $request->input('payload');
+    $userId = $payload['userId'];
     // ...
   }
 });
 ```
 
-### client event hook
+### Client event hook
 When users use `whisper` to broadcast an event in a channel `event` should be `client_event`. 
 
 > Notes that there is no X-CSRF-TOKEN in header when sending a post request for client-event event, so you'd better not to use the route in `/routes/web.php`.
@@ -436,10 +480,10 @@ Route configuration example
 ```php
 use Illuminate\Http\Request;
 
-Route::post('/hoot', function(Request $request) {
+Route::post('/hook', function(Request $request) {
   if ($request->input('event') === 'client_event') {
     $channel = $request->input('channel');
-    $user_id = $request->header('Cookie');
+    $userId = $request->header('Cookie');
     $payload = $request->input('payload');
     $from = $payload['from'];
     $to = $payload['to'];

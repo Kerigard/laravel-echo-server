@@ -7,29 +7,21 @@ var fs = require('fs');
 export class Channel {
     /**
      * Channels and patters for private channels.
-     *
-     * @type {array}
      */
     protected _privateChannels: string[] = ['private-*', 'presence-*'];
 
     /**
      * Allowed client events
-     *
-     * @type {array}
      */
     protected _clientEvents: string[] = ['client-*'];
 
     /**
      * Private channel instance.
-     *
-     * @type {PrivateChannel}
      */
     private: PrivateChannel;
 
     /**
      * Presence channel instance.
-     *
-     * @type {PresenceChannel}
      */
     presence: PresenceChannel;
 
@@ -56,10 +48,6 @@ export class Channel {
 
     /**
      * Join a channel.
-     *
-     * @param  {object} socket
-     * @param  {object} data
-     * @return {void}
      */
     join(socket, data): void {
         if (data.channel) {
@@ -74,14 +62,15 @@ export class Channel {
 
     /**
      * Trigger a client message
-     *
-     * @param  {object} socket
-     * @param  {object} data
-     * @return {void}
      */
     clientEvent(socket, data): void {
+        try {
+            data = JSON.parse(data);
+        } catch (e) {
+            data = data;
+        }
+
         if (data.event && data.channel) {
-            Log.info(data);
             if (this.isClientEvent(data.event) &&
                 this.isPrivate(data.channel) &&
                 this.isInChannel(socket, data.channel)) {
@@ -99,12 +88,6 @@ export class Channel {
 
     /**
      * Leave a channel.
-     *
-     * @param  {object} socket
-     * @param  {string} channel
-     * @param  {string} reason
-     * @param  {object} auth
-     * @return {void}
      */
     async leave(socket: any, channel: string, reason: string, auth: any): Promise<void> {
         if (channel) {
@@ -119,7 +102,7 @@ export class Channel {
             socket.leave(channel);
 
             if (this.options.devMode) {
-                Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} left channel: ${channel} (${reason})`);
+                Log.info(`[${new Date().toISOString()}] - ${socket.id} left channel: ${channel} (${reason})`);
             }
 
             let payload;
@@ -145,9 +128,6 @@ export class Channel {
 
     /**
      * Check if the incoming socket connection is a private channel.
-     *
-     * @param  {string} channel
-     * @return {boolean}
      */
     isPrivate(channel: string): boolean {
         let isPrivate = false;
@@ -162,10 +142,6 @@ export class Channel {
 
     /**
      * Join private channel, emit data to presence channels.
-     *
-     * @param  {object} socket
-     * @param  {object} data
-     * @return {void}
      */
     joinPrivate(socket: any, data: any): void {
         this.private.authenticate(socket, data).then(res => {
@@ -192,9 +168,6 @@ export class Channel {
 
     /**
      * Check if a channel is a presence channel.
-     *
-     * @param  {string} channel
-     * @return {boolean}
      */
     isPresence(channel: string): boolean {
         return channel.lastIndexOf('presence-', 0) === 0;
@@ -202,15 +175,10 @@ export class Channel {
 
     /**
      * On join a channel log success.
-     *
-     * @param {any} socket
-     * @param {string} channel
-     * @param {any} auth
-     * @param {any} member
      */
     onJoin(socket: any, channel: string, auth: any, member: any = null): void {
         if (this.options.devMode) {
-            Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} joined channel: ${channel}`);
+            Log.info(`[${new Date().toISOString()}] - ${socket.id} joined channel: ${channel}`);
         }
 
         let payload;
@@ -235,9 +203,6 @@ export class Channel {
 
     /**
      * Check if client is a client event
-     *
-     * @param  {string} event
-     * @return {boolean}
      */
     isClientEvent(event: string): boolean {
         let isClientEvent = false;
@@ -252,10 +217,6 @@ export class Channel {
 
     /**
      * Check if a socket has joined a channel.
-     *
-     * @param socket
-     * @param channel
-     * @returns {boolean}
      */
     isInChannel(socket: any, channel: string): boolean {
         return !!socket.rooms[channel];
@@ -282,17 +243,17 @@ export class Channel {
         this.request.post(options, (error, response, body, next) => {
             if (error) {
                 if (this.options.devMode) {
-                    Log.error(`[${new Date().toLocaleTimeString()}] - Error call ${event} hook ${socket.id} for ${options.form.channel}`);
+                    Log.error(`[${new Date().toISOString()}] - Error call ${event} hook ${socket.id} for ${options.form.channel}`);
                 }
                 Log.error(error);
             } else if (response.statusCode !== 200) {
                 if (this.options.devMode) {
-                    Log.warning(`[${new Date().toLocaleTimeString()}] - Error call ${event} hook ${socket.id} for ${options.form.channel}`);
+                    Log.warning(`[${new Date().toISOString()}] - Error call ${event} hook ${socket.id} for ${options.form.channel}`);
                     Log.error(response.body);
                 }
             } else {
                 if (this.options.devMode) {
-                    Log.info(`[${new Date().toLocaleTimeString()}] - Call ${event} hook for ${socket.id} for ${options.form.channel}: ${response.body}`);
+                    Log.info(`[${new Date().toISOString()}] - Call ${event} hook for ${socket.id} for ${options.form.channel}: ${response.body}`);
                 }
             }
         });

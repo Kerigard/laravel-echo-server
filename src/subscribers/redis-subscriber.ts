@@ -11,11 +11,20 @@ export class RedisSubscriber implements Subscriber {
     private _redis: any;
 
     /**
+     *
+     * KeyPrefix for used in the redis Connection
+     *
+     * @type {String}
+     */
+    private _keyPrefix: string;
+
+    /**
      * Create a new instance of subscriber.
      *
      * @param {any} options
      */
     constructor(private options) {
+        this._keyPrefix = options.databaseConfig.redis.keyPrefix || '';
         this._redis = new Redis(options.databaseConfig.redis);
     }
 
@@ -37,7 +46,7 @@ export class RedisSubscriber implements Subscriber {
                         Log.info("Data: " + JSON.stringify(message.data));
                     }
 
-                    callback(channel, message);
+                    callback(channel.substring(this._keyPrefix.length), message);
                 } catch (e) {
                     if (this.options.devMode) {
                         Log.info("No JSON message");
@@ -45,7 +54,7 @@ export class RedisSubscriber implements Subscriber {
                 }
             });
 
-            this._redis.psubscribe('*', (err, count) => {
+            this._redis.psubscribe(`${this._keyPrefix}*`, (err, count) => {
                 if (err) {
                     reject('Redis could not subscribe.')
                 }
@@ -54,6 +63,22 @@ export class RedisSubscriber implements Subscriber {
 
                 resolve();
             });
+        });
+    }
+
+    /**
+     * Unsubscribe from events to broadcast.
+     *
+     * @return {Promise}
+     */
+    unsubscribe(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            try {
+                this._redis.disconnect();
+                resolve();
+            } catch(e) {
+                reject('Could not disconnect from redis -> ' + e);
+            }
         });
     }
 }

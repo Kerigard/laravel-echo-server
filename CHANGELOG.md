@@ -1,4 +1,31 @@
-#1.5.0
+# 1.6.3
+
+## Fixed
+
+-   Security patch - update dependencies
+
+# 1.6.2
+
+## Added
+
+-   Add method to stop the server (#502)[https://github.com/tlaverdure/laravel-echo-server/pull/502]
+-   Document how to use Redis Sentinel (#437)[https://github.com/tlaverdure/laravel-echo-server/pull/437]
+-   Add Apache proxt example tp docs (#361)[https://github.com/tlaverdure/laravel-echo-server/pull/361]
+-   Expose user member user info in API. (#356)[https://github.com/tlaverdure/laravel-echo-server/pull/356]
+
+## Fixed
+
+-   Fix crash when invalid referer is sent (#513)[https://github.com/tlaverdure/laravel-echo-server/pull/513]
+
+# 1.6.1
+
+-   Update dependencies for security reasons.
+
+# 1.6.0
+
+Add support for Redis prefixing.
+
+# 1.5.0
 
 Add `stop` command
 
@@ -7,13 +34,14 @@ Add `stop` command
 Allow variables in .env file to set options in the server configuration.
 
 ### Updates
--   Auth Host: `LARAVEL_ECHO_SERVER_AUTH_HOST` *Note*: This option will fall back to the `LARAVEL_ECHO_SERVER_HOST` option as the default if that is set in the .env file.
 
--   *Host*: `LARAVEL_ECHO_SERVER_HOST`
+-   Auth Host: `LARAVEL_ECHO_SERVER_AUTH_HOST` _Note_: This option will fall back to the `LARAVEL_ECHO_SERVER_HOST` option as the default if that is set in the .env file.
 
--   *Port*: `LARAVEL_ECHO_SERVER_PORT`
+-   _Host_: `LARAVEL_ECHO_SERVER_HOST`
 
--   *Debug*: `LARAVEL_ECHO_SERVER_DEBUG`
+-   _Port_: `LARAVEL_ECHO_SERVER_PORT`
+
+-   _Debug_: `LARAVEL_ECHO_SERVER_DEBUG`
 
 # 1.3.3
 
@@ -30,8 +58,11 @@ Updated to socket.io v2
 # 1.2.0
 
 ## Upgrade Guide
-* Re-install laravel-echo-server globally using the command.
+
+-   Re-install laravel-echo-server globally using the command.
+
 ```
 npm install -g laravel-echo-server
 ```
-* In your `laravel-echo-server.json` file, remove the section named `referrers`. Then follow the [instructions](https://github.com/tlaverdure/laravel-echo-server#api-clients) to generate an app id and key. The `referrers` section has been replaced with `clients`.
+
+-   In your `laravel-echo-server.json` file, remove the section named `referrers`. Then follow the [instructions](https://github.com/tlaverdure/laravel-echo-server#api-clients) to generate an app id and key. The `referrers` section has been replaced with `clients`.
